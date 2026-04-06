@@ -136,36 +136,32 @@ export default function LoginPage() {
 
 					{/* Google button */}
 					<GoogleLogin
-  onSuccess={async (credentialResponse) => {
-    const decoded = jwtDecode(credentialResponse.credential);
+						onSuccess={async (credentialResponse) => {
+							try {
+								const res = await axios.post(
+									import.meta.env.VITE_API_URL + "/users/google-login",
+									{
+										token: credentialResponse.credential,
+									}
+								);
 
-    try {
-      const res = await axios.post(
-        import.meta.env.VITE_API_URL + "/users/google-login",
-        {
-          email: decoded.email,
-          name: decoded.name,
-          picture: decoded.picture,
-        }
-      );
+								localStorage.setItem("token", res.data.token);
+								toast.success("Google Login Successful");
 
-      localStorage.setItem("token", res.data.token);
-      toast.success("Google Login Successful");
+								if (res.data.role === "admin") {
+									navigate("/admin/");
+								} else {
+									navigate("/profile");
+								}
 
-      if (res.data.role === "admin") {
-        navigate("/admin/");
-      } else {
-        navigate("/profile");
-      }
-
-    } catch (err) {
-      toast.error("Google login failed");
-    }
-  }}
-  onError={() => {
-    toast.error("Google Sign-In Failed");
-  }}
-/>
+							} catch (err) {
+								toast.error("Google login failed");
+							}
+						}}
+						onError={() => {
+							toast.error("Google Sign-In Failed");
+						}}
+					/>
 
 					{/* Sign up */}
 					<p className="text-center text-[#021a5470] text-sm">
